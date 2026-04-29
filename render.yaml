@@ -1,0 +1,27 @@
+# render.yaml - Deployment configuration for Render.com
+# This tells Render how to deploy your app
+
+services:
+  # Backend (Node.js server)
+  - type: web
+    name: skribbl-clone-server
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: NODE_ENV
+        value: production
+
+  # Frontend (React app as static site)
+  - type: web
+    name: skribbl-clone-client
+    env: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_SERVER_URL
+        value: https://skribbl-clone-server.onrender.com  # Update this after deploying backend
