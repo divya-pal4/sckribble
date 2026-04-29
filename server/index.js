@@ -24,6 +24,11 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// ─── Serve React frontend (production build) ──────────────────────────
+// Serve static files from client/build
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../client/build')));
+
 // ─── In-memory room storage ───────────────────────────────────────────
 // rooms = { roomId: Room }
 // In a real app you'd use a database, but for this assignment memory is fine
@@ -255,6 +260,12 @@ io.on('connection', (socket) => {
       break;
     }
   });
+});
+
+// ─── Catch-all route for React SPA (MUST be LAST) ────────────────────
+// Serve index.html for all non-API routes so React Router can handle them
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 // ─── Start Server ────────────────────────────────────────────────────
