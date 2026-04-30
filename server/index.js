@@ -20,8 +20,9 @@ const io = new Server(server, {
       // Allow all origins in development, specific ones in production
       if (process.env.NODE_ENV === 'production') {
         const allowed = [
-          'https://skribbl-clone-client.onrender.com',
-          'https://skribbl-clone-server.onrender.com',
+          'https://sckribble-client.onrender.com',
+          'https://sckribble-server.onrender.com',
+          'https://sckribble.onrender.com',
           'http://localhost:3000',
           'http://localhost:3001'
         ];
@@ -47,11 +48,6 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
-
-// ─── Serve React frontend (production build) ──────────────────────────
-// Serve static files from client/build
-const path = require('path');
-app.use(express.static(path.join(__dirname, '../client/build')));
 
 // ─── In-memory room storage ───────────────────────────────────────────
 // rooms = { roomId: Room }
@@ -286,12 +282,6 @@ io.on('connection', (socket) => {
       break;
     }
   });
-});
-
-// ─── Catch-all route for React SPA (MUST be LAST) ────────────────────
-// Serve index.html for all non-API routes so React Router can handle them
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 // ─── Start Server ────────────────────────────────────────────────────
