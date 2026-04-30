@@ -185,28 +185,146 @@ Simple, case-insensitive, whitespace-trimmed equality. No fuzzy matching (by des
 
 ## 🚢 Deployment Guide
 
-### Option A: Render.com (Recommended — supports WebSockets)
+### Current Deployment (Render.com - Two Separate Services)
 
-**Deploy Backend:**
-1. Create account at [render.com](https://render.com)
-2. New → Web Service → Connect your repo
-3. Root directory: `server`
-4. Build: `npm install`
-5. Start: `node index.js`
-6. Copy the URL (e.g. `https://skribbl-server.onrender.com`)
+The app is deployed on two separate Render services:
 
-**Deploy Frontend:**
-1. New → Static Site → Same repo
-2. Root directory: `client`
-3. Build: `npm install && npm run build`
-4. Publish directory: `build`
-5. Add env variable: `REACT_APP_SERVER_URL=https://your-server-url.onrender.com`
+**Live URLs:**
+- 🎮 **Frontend:** https://sckribble-client.onrender.com
+- 🔌 **Backend:** https://sckribble-server.onrender.com
 
-### Option B: Railway
-Same setup, even simpler. Railway auto-detects Node.js.
+### How to Deploy Your Own
 
-### ⚠️ Vercel / Netlify Note
-These platforms use serverless functions and **do not support persistent WebSocket connections**. Use them only for the frontend; host the backend on Render or Railway.
+#### Prerequisites
+- GitHub account with your repository pushed
+- Render.com account
+
+#### Step 1: Deploy Backend (Web Service)
+
+1. Go to [render.com](https://render.com) and log in
+2. Click **"+ New"** → **"Web Service"**
+3. Connect your GitHub repository
+4. Fill in:
+   - **Name:** `sckribble-server` (or your preferred name)
+   - **Branch:** `main`
+   - **Root Directory:** `server`
+   - **Environment:** `Node`
+   - **Build Command:** `npm install`
+   - **Start Command:** `node index.js`
+5. Click **"Create Web Service"**
+6. Wait 3-5 minutes for deployment to complete (green ✅ status)
+7. Copy the URL from the dashboard (e.g., `https://sckribble-server.onrender.com`)
+
+#### Step 2: Deploy Frontend (Static Site)
+
+1. Go back to Render dashboard
+2. Click **"+ New"** → **"Static Site"**
+3. Connect your GitHub repository (same repo)
+4. Fill in:
+   - **Name:** `sckribble-client` (or your preferred name)
+   - **Branch:** `main`
+   - **Root Directory:** `client`
+   - **Build Command:** `npm install && npm run build`
+   - **Publish Directory:** `build`
+5. Add Environment Variable:
+   - **Name:** `REACT_APP_SERVER_URL`
+   - **Value:** `https://sckribble-server.onrender.com` (use your backend URL from Step 1)
+6. Click **"Create Static Site"**
+7. Wait 5-10 minutes for deployment to complete (green ✅ status)
+
+#### Step 3: Test the Connection
+
+1. Open your frontend URL: `https://sckribble-client.onrender.com`
+2. Press **F12** → **Console** tab
+3. You should see:
+   ```
+   ✅ Socket connected: [socket-id]
+   ```
+4. Try creating a room and verify socket logs appear in the console
+
+### Why Separate Services?
+
+- ✅ **Independent scaling** - Backend and frontend scale separately
+- ✅ **WebSocket support** - Static site hosts can't handle persistent WebSockets
+- ✅ **Cleaner architecture** - Backend focuses on logic, frontend on UI
+- ✅ **Easy updates** - Deploy either service without affecting the other
+- ✅ **Better performance** - Each service optimized for its purpose
+
+### Auto-Deploy on GitHub Push
+
+Once set up, both services will automatically redeploy when you push to `main` branch:
+
+```bash
+git add -A
+git commit -m "Your changes"
+git push origin main
+```
+
+Both services will rebuild and deploy within 5-10 minutes.
+
+### Alternative: Render.yaml (Advanced)
+
+For a true monorepo setup, use the included `render.yaml`:
+
+```bash
+git push origin main  # Will auto-detect render.yaml and create both services
+```
+
+This requires one-time setup but then manages both services as a unified deployment.
+
+---
+
+## 🔧 Troubleshooting
+
+### "Not connected to server" error
+
+**Problem:** The app shows "Connecting to server... please wait a moment and try again"
+
+**Solutions:**
+1. **Wait for server to deploy** - First deployment takes 5-10 minutes. Check Render dashboard for green ✅ status
+2. **Check environment variable** - In Render dashboard → `sckribble-client` → Settings → Environment Variables
+   - Verify `REACT_APP_SERVER_URL` is set to your backend URL (e.g., `https://sckribble-server.onrender.com`)
+3. **Hard refresh browser** - Press `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac) to clear cache
+4. **Check browser console** - Press F12 → Console tab
+   - Should show `✅ Socket connected: [socket-id]`
+   - If not, check if the server URL is correct
+
+### WebSocket errors in console
+
+**Example error:**
+```
+WebSocket connection to 'wss://sckribble-client.onrender.com/socket.io/...' failed
+```
+
+**Problem:** The client is trying to connect to itself instead of the backend
+
+**Solution:**
+1. Go to Render dashboard → `sckribble-client` → Settings
+2. Update `REACT_APP_SERVER_URL` to point to your backend server URL
+3. Click Save (triggers redeploy)
+4. Wait 3-5 minutes and refresh the browser
+
+### Room creation fails silently
+
+**Problem:** Click "Create Room" but nothing happens, no error shown
+
+**Solutions:**
+1. Check browser console (F12) for any error messages
+2. Verify both services show green ✅ status in Render dashboard
+3. Try a hard refresh: `Ctrl+Shift+R`
+4. If still failing, check the backend logs:
+   - Go to Render dashboard → `sckribble-server` → Logs
+   - Should show: `🚀 Server running on port 3001`
+   - Look for any error messages
+
+### Can't join a room with a code
+
+**Problem:** "Room not found" error even though the code is correct
+
+**Solutions:**
+1. Verify the 6-letter room code is exactly correct (uppercase)
+2. Ask the host to check if anyone else is in the room (if empty, it may have been deleted)
+3. Create a new room and share a fresh invite link instead
 
 ---
 
