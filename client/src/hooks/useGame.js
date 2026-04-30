@@ -191,16 +191,32 @@ export function useGame() {
 
   // ─── Actions (things the user can do) ───────────────────────────────
   const createRoom = useCallback((playerName, settings, avatarId) => {
-    if (!socket || !socket.connected) {
-      setError('Not connected to server. Please try again.');
+    if (!socket) {
+      setError('Socket not initialized. Please refresh the page.');
+      return;
+    }
+    if (!socket.connected) {
+      setError('Connecting to server... please wait a moment and try again.');
+      // Try to connect if not already connecting
+      if (!socket.connecting) {
+        socket.connect();
+      }
       return;
     }
     socket.emit('create_room', { playerName, settings, avatarId });
   }, [socket]);
 
   const joinRoom = useCallback((roomId, playerName, avatarId) => {
-    if (!socket || !socket.connected) {
-      setError('Not connected to server. Please try again.');
+    if (!socket) {
+      setError('Socket not initialized. Please refresh the page.');
+      return;
+    }
+    if (!socket.connected) {
+      setError('Connecting to server... please wait a moment and try again.');
+      // Try to connect if not already connecting
+      if (!socket.connecting) {
+        socket.connect();
+      }
       return;
     }
     socket.emit('join_room', { roomId, playerName, avatarId });

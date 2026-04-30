@@ -14,6 +14,7 @@ export function SocketProvider({ children }) {
   const socketRef = useRef(null);
 
   if (!socketRef.current) {
+    console.log('🔌 Initializing socket connection to:', SERVER_URL);
     socketRef.current = io(SERVER_URL, {
       autoConnect: true,
       reconnection: true,
@@ -21,7 +22,9 @@ export function SocketProvider({ children }) {
       reconnectionDelayMax: 5000,
       reconnectionAttempts: Infinity,
       transports: ['websocket', 'polling'],
-      withCredentials: true
+      withCredentials: true,
+      forceNew: false,
+      rejectUnauthorized: false // For self-signed certs in development
     });
 
     // Add connection event logging
@@ -30,11 +33,19 @@ export function SocketProvider({ children }) {
     });
 
     socketRef.current.on('connect_error', (error) => {
-      console.error('❌ Socket connection error:', error);
+      console.error('❌ Socket connection error:', error.message || error);
     });
 
     socketRef.current.on('disconnect', (reason) => {
       console.log('⚠️ Socket disconnected:', reason);
+    });
+
+    socketRef.current.on('reconnect_attempt', () => {
+      console.log('🔄 Reconnecting to server...');
+    });
+
+    socketRef.current.on('reconnect', () => {
+      console.log('✅ Reconnected to server');
     });
   }
 

@@ -19,15 +19,17 @@ const io = new Server(server, {
     origin: function(origin, callback) {
       // Allow all origins in development, specific ones in production
       if (process.env.NODE_ENV === 'production') {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        // and from the same origin or deployed frontend
         const allowed = [
           'https://skribbl-clone-client.onrender.com',
-          'https://skribbl-clone-server.onrender.com'
+          'https://skribbl-clone-server.onrender.com',
+          'http://localhost:3000',
+          'http://localhost:3001'
         ];
-        if (!origin || allowed.includes(origin)) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowed.some(a => origin.includes(a) || a.includes(origin))) {
           callback(null, true);
         } else {
+          console.warn('CORS blocked request from:', origin);
           callback(new Error('Not allowed by CORS'));
         }
       } else {
@@ -38,7 +40,9 @@ const io = new Server(server, {
     credentials: true,
     methods: ['GET', 'POST']
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  pingInterval: 10000,
+  pingTimeout: 5000
 });
 
 app.use(cors());
@@ -78,10 +82,12 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 io.on('connection', (socket) => {
   console.log(`🔌 Player connected: ${socket.id}`);
+  console.log(`   Headers:`, { origin: socket.request.headers.origin });
 
   // ── CREATE ROOM ────────────────────────────────────────────────────
   // Client sends: { playerName, settings, avatarId }
   socket.on('create_room', ({ playerName, settings = {}, avatarId }) => {
+    console.log(`📝 create_room event received from ${socket.id}: ${playerName}`);
     const room = new Room(socket.id, playerName, { ...settings, hostAvatarId: avatarId }, io);
     rooms[room.id] = room;
 
