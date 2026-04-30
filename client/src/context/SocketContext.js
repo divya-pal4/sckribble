@@ -18,6 +18,23 @@ export function SocketProvider({ children }) {
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
+      transports: ['websocket', 'polling'],
+      withCredentials: true
+    });
+
+    // Add connection event logging
+    socketRef.current.on('connect', () => {
+      console.log('✅ Socket connected:', socketRef.current.id);
+    });
+
+    socketRef.current.on('connect_error', (error) => {
+      console.error('❌ Socket connection error:', error);
+    });
+
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('⚠️ Socket disconnected:', reason);
     });
   }
 

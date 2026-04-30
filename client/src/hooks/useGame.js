@@ -191,10 +191,18 @@ export function useGame() {
 
   // ─── Actions (things the user can do) ───────────────────────────────
   const createRoom = useCallback((playerName, settings, avatarId) => {
+    if (!socket || !socket.connected) {
+      setError('Not connected to server. Please try again.');
+      return;
+    }
     socket.emit('create_room', { playerName, settings, avatarId });
   }, [socket]);
 
   const joinRoom = useCallback((roomId, playerName, avatarId) => {
+    if (!socket || !socket.connected) {
+      setError('Not connected to server. Please try again.');
+      return;
+    }
     socket.emit('join_room', { roomId, playerName, avatarId });
   }, [socket]);
 

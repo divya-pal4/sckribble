@@ -16,9 +16,29 @@ const server = http.createServer(app); // Wrap express in http server
 // Socket.IO needs the http server (not express directly)
 const io = new Server(server, {
   cors: {
-    origin: '*', // In production, set this to your frontend URL
+    origin: function(origin, callback) {
+      // Allow all origins in development, specific ones in production
+      if (process.env.NODE_ENV === 'production') {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        // and from the same origin or deployed frontend
+        const allowed = [
+          'https://skribbl-clone-client.onrender.com',
+          'https://skribbl-clone-server.onrender.com'
+        ];
+        if (!origin || allowed.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      } else {
+        // In development, allow all
+        callback(null, true);
+      }
+    },
+    credentials: true,
     methods: ['GET', 'POST']
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
 app.use(cors());
@@ -270,6 +290,7 @@ app.get('*', (req, res) => {
 
 // ─── Start Server ────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 });
