@@ -1,8 +1,17 @@
-# 🎨 Skribbl Clone – Premium Multiplayer Drawing Game
-
-A full-featured Skribbl.io-inspired drawing game with emoji avatars, custom words, sound effects, reactions, spectator mode, drawing replay, and votekick moderation.
-
+# 🎨 Sckribble
+ 
+> A full-featured real-time multiplayer drawing and guessing game — built with WebSockets, OOP architecture, and deployed on Render.
+ 
+**[▶ Play Live](https://sckribble-client.onrender.com)**
+ 
 ---
+ 
+## 🎮 What Is It?
+ 
+Sckribble is a skribbl.io-inspired game where one player draws a word and others race to guess it. Built as a solo engineering project to explore real-time WebSocket architecture, game state machines, and OOP design patterns.
+ 
+---
+
 
 ## ✨ Premium Features at a Glance
 
@@ -27,7 +36,7 @@ A full-featured Skribbl.io-inspired drawing game with emoji avatars, custom word
 
 ### 1. Clone & Install
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/divya-pal4/sckribble.git
 cd skribbl-clone
 
 # Install all dependencies (root + server + client)
